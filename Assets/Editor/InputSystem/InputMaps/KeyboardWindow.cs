@@ -1,31 +1,83 @@
+using System;
+using System.Collections.Generic;
+using CustomInputSystem;
 using UnityEditor;
 using UnityEngine;
 
 namespace Editor.InputSystem.InputMaps
 {
-    public class KeyboardWindow: EditorWindow
+    public class KeyboardWindow : EditorWindow
     {
-        string myText = "Привет, редактор!";
-        bool toggle = false;
+        private static Dictionary<Actions, string> _displayNames = new()
+        {
+            { Actions.Cast_1, "Каст 1" },
+            { Actions.Cast_2, "Каст 2" },
+            { Actions.Cast_3, "Каст 3" },
+            { Actions.Cast_4, "Каст 4" },
+            { Actions.Inventory, "Инвентарь" },
+            { Actions.Menu, "Меню" }
+        };
 
+        private Actions? waitingForBind = null;
 
         [MenuItem("InputSystem/Keyboard Layout")]
         public static void ShowKeyboardLayoutWindow()
         {
             GetWindow<KeyboardWindow>("Keyboard Layout");
         }
-        
+
         private void OnGUI()
         {
-            GUILayout.Label("Моё кастомное окно", EditorStyles.boldLabel);
+            GUILayout.Label("Назначение клавиш", EditorStyles.boldLabel);
 
-            myText = EditorGUILayout.TextField("Текст:", myText);
-            toggle = EditorGUILayout.Toggle("Включить что-то", toggle);
-
-            if (GUILayout.Button("Нажми меня"))
+            foreach (var action in Enum.GetValues(typeof(Actions)))
             {
-                Debug.Log("Нажата кнопка! Текст: " + myText + ", Тоггл: " + toggle);
+                DrawBindingRow((Actions)action);
             }
+
+            if (waitingForBind.HasValue)
+            {
+                GUILayout.Space(10);
+                GUILayout.Label("Нажмите любую клавишу...", EditorStyles.helpBox);
+
+                Event e = Event.current;
+                if (e.isKey)
+                {
+                    InputManager inputManager = FindObjectOfType<InputManager>();
+                    if (inputManager != null)
+                    {
+                        inputManager.RebindKey(waitingForBind.Value, e.keyCode);
+                        Repaint();
+                    }
+
+                    waitingForBind = null;
+                    GUIUtility.keyboardControl = 0;
+                }
+
+                // Блокируем все остальные элементы
+                GUI.FocusControl(null);
+            }
+        }
+
+        private void DrawBindingRow(Actions action)
+        {
+            InputManager inputManager = FindObjectOfType<InputManager>();
+            if (inputManager == null) return;
+
+            GUILayout.BeginHorizontal();
+
+            GUILayout.Label(_displayNames.ContainsKey(action) ? _displayNames[action] : action.ToString(),
+                GUILayout.Width(150));
+            GUILayout.Label(inputManager.GetKeyBinding(action).ToString(), GUILayout.Width(100));
+
+            if (waitingForBind == null && GUILayout.Button("Изменить", GUILayout.Width(100)))
+            {
+                waitingForBind = action;
+            }
+
+            GUILayout.EndHorizontal();
+
+            GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
         }
     }
 }

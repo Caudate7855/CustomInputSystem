@@ -51,9 +51,30 @@ namespace CustomInputSystem
 
         public void RebindKey(Actions action, KeyCode newKey)
         {
-            _keyBindings[action] = newKey;
-            
-            Debug.Log($"Rebound {action} to : {newKey}");
+            Actions? alreadyBoundAction = null;
+
+            foreach (var pair in _keyBindings)
+            {
+                if (pair.Value == newKey && pair.Key != action)
+                {
+                    alreadyBoundAction = pair.Key;
+                    break;
+                }
+            }
+
+            if (alreadyBoundAction.HasValue)
+            {
+                KeyCode oldKey = _keyBindings[action];
+                _keyBindings[action] = newKey;
+                _keyBindings[alreadyBoundAction.Value] = oldKey;
+
+                Debug.Log($"Swapped keys: {action} ⇄ {alreadyBoundAction.Value}");
+            }
+            else
+            {
+                _keyBindings[action] = newKey;
+                Debug.Log($"Rebound {action} to: {newKey}");
+            }
         }
 
         public KeyCode GetKeyBinding(Actions action)
