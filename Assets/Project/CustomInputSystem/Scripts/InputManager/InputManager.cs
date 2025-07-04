@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -12,43 +13,71 @@ namespace CustomInputSystem
             { Actions.Cast_1, KeyCode.Alpha1 },
             { Actions.Cast_2, KeyCode.Alpha2 },
             { Actions.Cast_3, KeyCode.Alpha3 },
-            { Actions.Cast_4, KeyCode.Alpha4},
-            
+            { Actions.Cast_4, KeyCode.Alpha4 },
+            { Actions.Cast_5, KeyCode.Alpha5 },
             { Actions.Inventory, KeyCode.E },
             { Actions.Menu, KeyCode.Escape },
         };
-        
+
+        private void Awake()
+        {
+            /*foreach (Actions action in Enum.GetValues(typeof(Actions)))
+            {
+                if (!_keyBindings.ContainsKey(action))
+                {
+                    _keyBindings[action] = KeyCode.None;
+                    Debug.Log($"Added default binding for {action} = KeyCode.None");
+                }
+            }*/
+        }
+
         private void Update()
         {
-            if (GetKeyDown(Actions.Cast_1))
-                _globalController.Cast_1();
+            foreach (var binding in _keyBindings)
+            {
+                if (Input.GetKeyDown(binding.Value))
+                {
+                    ExecuteAction(binding.Key);
+                }
+            }
+        }
 
-            if (GetKeyDown(Actions.Cast_2))
-                _globalController.Cast_2();
-            
-            if (GetKeyDown(Actions.Cast_3))
-                _globalController.Cast_3();
+        private void ExecuteAction(Actions action)
+        {
+            switch (action)
+            {
+                case Actions.Cast_1: _globalController.Cast_1(); break;
+                case Actions.Cast_2: _globalController.Cast_2(); break;
+                case Actions.Cast_3: _globalController.Cast_3(); break;
+                case Actions.Cast_4: _globalController.Cast_4(); break;
+                case Actions.Cast_5: _globalController.Cast_5(); break;
+                case Actions.Cast_6: _globalController.Cast_6(); break;
 
-            if (GetKeyDown(Actions.Cast_4))
-                _globalController.Cast_4();
-            
-            if (GetKeyDown(Actions.Inventory))
-                _globalController.SwitchInventory();
+                case Actions.Inventory: _globalController.SwitchInventory(); break;
+                case Actions.Menu: _globalController.SwitchMenu(); break;
 
-            if (GetKeyDown(Actions.Menu))
-                _globalController.SwitchMenu();
+                // Добавь сюда новые действия, если они требуют вызова методов
+                default:
+                    Debug.Log($"Action {action} pressed — no handler yet.");
+                    break;
+            }
         }
 
         public bool GetKey(Actions action)
         {
-            return Input.GetKey(_keyBindings[action]);
+            return _keyBindings.ContainsKey(action) && Input.GetKey(_keyBindings[action]);
         }
 
         public bool GetKeyDown(Actions action)
         {
-            return Input.GetKeyDown(_keyBindings[action]);
+            return _keyBindings.ContainsKey(action) && Input.GetKeyDown(_keyBindings[action]);
         }
 
+        public void AddKey(Actions action, KeyCode newKey)
+        {
+            _keyBindings.Add(action, newKey);
+        }
+        
         public void RebindKey(Actions action, KeyCode newKey)
         {
             Actions? alreadyBoundAction = null;
@@ -79,7 +108,12 @@ namespace CustomInputSystem
 
         public KeyCode GetKeyBinding(Actions action)
         {
-            return _keyBindings[action];
+            return _keyBindings.ContainsKey(action) ? _keyBindings[action] : KeyCode.None;
+        }
+
+        public bool HasBinding(Actions action)
+        {
+            return _keyBindings.ContainsKey(action);
         }
     }
 }

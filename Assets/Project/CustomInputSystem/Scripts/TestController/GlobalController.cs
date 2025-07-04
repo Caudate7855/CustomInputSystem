@@ -24,6 +24,16 @@ namespace CustomInputSystem
             Debug.Log("Cast 4");
         }
         
+        public void Cast_5()
+        {
+            Debug.Log("Cast 5");
+        }
+        
+        public void Cast_6()
+        {
+            Debug.Log("Cast 6");
+        }
+        
         public void SwitchInventory()
         {
             Debug.Log("Inventory");

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using CustomInputSystem;
 using UnityEditor;
@@ -8,19 +7,22 @@ namespace Editor.InputSystem.InputMaps
 {
     public class KeyboardWindow : EditorWindow
     {
-        private KeyCodeConverter  _keyCodeConverter = new();
-        
+        private KeyCodeConverter _keyCodeConverter = new();
+
         private static Dictionary<Actions, string> _displayNames = new()
         {
             { Actions.Cast_1, "Каст 1" },
             { Actions.Cast_2, "Каст 2" },
             { Actions.Cast_3, "Каст 3" },
             { Actions.Cast_4, "Каст 4" },
+            { Actions.Cast_5, "Каст 5" },
             { Actions.Inventory, "Инвентарь" },
             { Actions.Menu, "Меню" }
         };
 
         private Actions? waitingForBind = null;
+        private Actions newActionToAdd;
+        private string newActionDescription = "";
 
         [MenuItem("InputSystem/Keyboard Layout")]
         public static void ShowKeyboardLayoutWindow()
@@ -32,10 +34,13 @@ namespace Editor.InputSystem.InputMaps
         {
             GUILayout.Label("Назначение клавиш", EditorStyles.boldLabel);
 
-            foreach (var action in Enum.GetValues(typeof(Actions)))
+            foreach (var action in _displayNames.Keys)
             {
-                DrawBindingRow((Actions)action);
+                DrawBindingRow(action);
             }
+
+            GUILayout.Space(10);
+            DrawAddActionSection();
 
             if (waitingForBind.HasValue)
             {
@@ -79,6 +84,34 @@ namespace Editor.InputSystem.InputMaps
             GUILayout.EndHorizontal();
 
             GUILayout.Box("", GUILayout.ExpandWidth(true), GUILayout.Height(1));
+        }
+
+        private void DrawAddActionSection()
+        {
+            GUILayout.Space(20);
+            GUILayout.Label("Добавить действие", EditorStyles.boldLabel);
+
+            newActionToAdd = (Actions)EditorGUILayout.EnumPopup("Действие:", newActionToAdd);
+            newActionDescription = EditorGUILayout.TextField("Описание:", newActionDescription);
+
+            GUI.enabled = !_displayNames.ContainsKey(newActionToAdd) &&
+                          !string.IsNullOrWhiteSpace(newActionDescription);
+
+            if (GUILayout.Button("Добавить"))
+            {
+                _displayNames[newActionToAdd] = newActionDescription;
+
+                var inputManager = FindObjectOfType<InputManager>();
+                if (inputManager != null && !inputManager.HasBinding(newActionToAdd))
+                {
+                    inputManager.AddKey(newActionToAdd, KeyCode.None);
+                }
+
+                newActionDescription = "";
+                Repaint();
+            }
+
+            GUI.enabled = true;
         }
     }
 }
