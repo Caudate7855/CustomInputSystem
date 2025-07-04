@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace CustomInputSystem
 {
-    public class TestController
+    public class GlobalController
     {
         public void Cast_1()
         {

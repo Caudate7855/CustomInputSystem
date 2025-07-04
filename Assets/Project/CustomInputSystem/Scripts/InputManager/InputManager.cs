@@ -5,7 +5,7 @@ namespace CustomInputSystem
 {
     public class InputManager : MonoBehaviour
     {
-        private TestController _testController = new();
+        private GlobalController _globalController = new();
 
         private Dictionary<Actions, KeyCode> _keyBindings = new()
         {
@@ -21,22 +21,22 @@ namespace CustomInputSystem
         private void Update()
         {
             if (GetKeyDown(Actions.Cast_1))
-                _testController.Cast_1();
+                _globalController.Cast_1();
 
             if (GetKeyDown(Actions.Cast_2))
-                _testController.Cast_2();
+                _globalController.Cast_2();
             
             if (GetKeyDown(Actions.Cast_3))
-                _testController.Cast_3();
+                _globalController.Cast_3();
 
             if (GetKeyDown(Actions.Cast_4))
-                _testController.Cast_4();
+                _globalController.Cast_4();
             
             if (GetKeyDown(Actions.Inventory))
-                _testController.SwitchInventory();
+                _globalController.SwitchInventory();
 
             if (GetKeyDown(Actions.Menu))
-                _testController.SwitchMenu();
+                _globalController.SwitchMenu();
         }
 
         public bool GetKey(Actions action)

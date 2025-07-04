@@ -8,6 +8,8 @@ namespace Editor.InputSystem.InputMaps
 {
     public class KeyboardWindow : EditorWindow
     {
+        private KeyCodeConverter  _keyCodeConverter = new();
+        
         private static Dictionary<Actions, string> _displayNames = new()
         {
             { Actions.Cast_1, "Каст 1" },
@@ -54,7 +56,6 @@ namespace Editor.InputSystem.InputMaps
                     GUIUtility.keyboardControl = 0;
                 }
 
-                // Блокируем все остальные элементы
                 GUI.FocusControl(null);
             }
         }
@@ -68,7 +69,7 @@ namespace Editor.InputSystem.InputMaps
 
             GUILayout.Label(_displayNames.ContainsKey(action) ? _displayNames[action] : action.ToString(),
                 GUILayout.Width(150));
-            GUILayout.Label(inputManager.GetKeyBinding(action).ToString(), GUILayout.Width(100));
+            GUILayout.Label(_keyCodeConverter.GetKeyCodeView(inputManager.GetKeyBinding(action)), GUILayout.Width(100));
 
             if (waitingForBind == null && GUILayout.Button("Изменить", GUILayout.Width(100)))
             {
